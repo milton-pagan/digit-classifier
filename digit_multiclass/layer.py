@@ -7,7 +7,7 @@ class Layer(object):
 
         self.activations = np.zeros(self.activations_shape)
 
-
+    # Returns z = sig(w * a)
     def calculate_activations(self, w):
 
         # Insert bias units
