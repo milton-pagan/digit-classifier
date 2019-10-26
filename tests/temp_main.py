@@ -10,7 +10,7 @@ inputs = dataset.iloc[: , 1:].to_numpy()
 # Prepare outputs
 temp = np.zeros((output.shape[0], 10))
 
-for sample, i in zip(temp, output) :
+for sample, i in zip(temp, output):
     sample[i] = 1
 
 output = temp

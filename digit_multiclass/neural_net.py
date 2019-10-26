@@ -33,9 +33,19 @@ class NeuralNetwork(object):
         gradient = [np.zeros((w.shape)) for w in self.weights]
 
         deltas = [self.layers[-1].activations - self.output.transpose()]
-        print(deltas[0].shape)
-        for w, l in zip(self.weights[:-1:-1], self.layers[-2:0:-1]):
-            deltas.append(1)
+
+        i = 0
+        for w, l in zip(self.weights[::-1], self.layers[-2:0:-1]):
+            a = np.insert(l.activations, 0, np.ones(l.activations_shape[1])).reshape((l.activations_shape[0] + 1, l.activations_shape[1]))
+
+            print(w.shape, a.shape, deltas[i].shape)
+            deltas.append(np.multiply(np.dot(w.transpose(), deltas[i]), np.multiply(a, 1 - a)))
+            i += 1
+
+        deltas = deltas[::-1]
+
+        for a in deltas:
+            print(a.shape)
 
     def cost_function(self, w):
         return (-1/len(self.inputs)) * np.sum(np.diagonal(np.nan_to_num(np.dot(np.log(self.layers[-1].activations), self.output) + np.dot(np.log(1 - self.layers[-1].activations), 1 - self.output)))) + (self.reg_param /(2 * len(self.inputs))) * np.sum(np.square(self.unroll_weights()))
@@ -48,10 +58,19 @@ class NeuralNetwork(object):
         self.layers[0].activations = self.inputs
 
     # Returns all weights in a single flattened ndarray (doesn't include weights for bias units)
-    def unroll_weights(self):
-        unrolled_weights = np.ravel(self.weights[0][:, 1:])
+    def unroll_weights(self, include_bias = False):
+
+        if not include_bias:
+            unrolled_weights = np.ravel(self.weights[0][:, 1:])
+
+            for w in self.weights[1:]:
+                np.concatenate((unrolled_weights, w[:, 1:].flatten()))
+
+            return unrolled_weights
+
+        unrolled_weights = np.ravel(self.weights[0])
 
         for w in self.weights[1:]:
-            np.concatenate((unrolled_weights, w[:, 1:].flatten()))
+            np.concatenate((unrolled_weights, w.flatten()))
 
         return unrolled_weights
