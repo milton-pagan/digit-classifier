@@ -34,22 +34,20 @@ class NeuralNetwork(object):
 
         deltas = [self.layers[-1].activations - self.output.transpose()]
 
+        deltas[0] = np.insert(deltas[0], 0, np.one())
+
+        print("first delta: " + str(deltas[0].shape))
+
         i = 0
         for w, l in zip(self.weights[::-1], self.layers[-2:0:-1]):
             a = np.insert(l.activations, 0, np.ones(l.activations_shape[1])).reshape((l.activations_shape[0] + 1, l.activations_shape[1]))
 
             print(w.shape, a.shape, deltas[i][1:, :].shape)
-            if i == 0:
-                deltas.append(np.multiply(np.dot(w.transpose(), deltas[i]), np.multiply(a, 1 - a)))
-
-            else:
-                deltas.append(np.multiply(np.dot(w.transpose(), deltas[i][1:, :]), np.multiply(a, 1 - a)))
-
+            deltas.append(np.multiply(np.dot(w.transpose(), deltas[i][1:, :]), np.multiply(a, 1 - a)))
             i += 1
 
         deltas = deltas[::-1]
 
-        print("\nDelta shapes: ")
         for a in deltas:
             print(a.shape)
 
