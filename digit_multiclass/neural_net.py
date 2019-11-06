@@ -38,12 +38,14 @@ class NeuralNetwork(object):
         for w, l in zip(self.weights[::-1], self.layers[-2:0:-1]):
             a = np.insert(l.activations, 0, np.ones(l.activations_shape[1])).reshape((l.activations_shape[0] + 1, l.activations_shape[1]))
 
-            print(w.shape, a.shape, deltas[i][1:, :].shape)
+            sigmoid_prime = np.multiply(a, 1 - a)
+
+            print(w.transpose().shape, deltas[i][1:, :].shape, a.shape)
             if i == 0:
-                deltas.append(np.multiply(np.dot(w.transpose(), deltas[i]), np.multiply(a, 1 - a)))
+                deltas.append(np.multiply(np.dot(w.transpose(), deltas[i]), sigmoid_prime))
 
             else:
-                deltas.append(np.multiply(np.dot(w.transpose(), deltas[i][1:, :]), np.multiply(a, 1 - a)))
+                deltas.append(np.multiply(np.dot(w.transpose(), deltas[i][1:, :]), sigmoid_prime))
 
             i += 1
 
@@ -56,14 +58,12 @@ class NeuralNetwork(object):
     def cost_function(self, w):
         return (-1/len(self.inputs)) * np.sum(np.diagonal(np.nan_to_num(np.dot(np.log(self.layers[-1].activations), self.output) + np.dot(np.log(1 - self.layers[-1].activations), 1 - self.output)))) + (self.reg_param /(2 * len(self.inputs))) * np.sum(np.square(self.unroll_weights()))
 
-
-
     # Aids functionality with multiple sample subsets (mini-batches)
     def change_inputs(self, inputs):
         self.inputs = inputs
         self.layers[0].activations = self.inputs
 
-    # Returns all weights in a single flattened ndarray (doesn't include weights for bias units)
+    # Returns all weights in a single flattened ndarray (doesn't include weights for bias units by default)
     def unroll_weights(self, include_bias = False):
 
         if not include_bias:

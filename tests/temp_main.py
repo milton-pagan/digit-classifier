@@ -18,16 +18,24 @@ output = temp
 ann = NeuralNetwork((784, 16, 16, 10), inputs, output)
 
 # Check shapes
+print("\nWeights shape: ")
 for weight in ann.weights:
     print(weight.shape)
 
+print("\nActivations shape: ")
+for layer in ann.layers:
+    print(layer.activations_shape)
+
 #Feedforward
 ann.feedforward(ann.weights)
-print(ann.layers[-1].activations.shape)
-print(output.shape)
+
+print("\nLast layer shape: " + str(ann.layers[-1].activations.shape))
+print("\nOutput shape: "+ str(output.shape))
 
 #Cost Function
+print("\nCost: ")
 print(ann.cost_function(ann.weights))
+print()
 
 #Backpropagation
 ann.backprop(ann.weights)
